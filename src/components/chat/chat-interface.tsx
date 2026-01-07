@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { config } from "@/lib/config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
+// import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { ChatMessage } from "@/components/chat/chat-message";
 
@@ -27,6 +27,25 @@ export function ChatInterface() {
   ]);
   const [inputValue, setInputValue] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+
+  const [sessionId, setSessionId] = React.useState("");
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    // Generate or retrieve session ID on mount
+    let storedSessionId = sessionStorage.getItem("chat_session_id");
+    if (!storedSessionId) {
+      storedSessionId = `session-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      sessionStorage.setItem("chat_session_id", storedSessionId);
+    }
+    setSessionId(storedSessionId);
+  }, []);
+
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isLoading]);
 
   const sendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -51,7 +70,7 @@ export function ChatInterface() {
         },
         body: JSON.stringify({
           message: inputValue,
-          sessionId: "test-session-user-1", // You could generate a UUID here
+          sessionId: sessionId, 
         }),
       });
 
@@ -100,7 +119,7 @@ export function ChatInterface() {
         </div>
       </div>
       
-      <ScrollArea className="flex-1 p-4">
+      <div className="flex-1 overflow-y-auto p-4">
         <div className="flex flex-col gap-4">
           {messages.map((msg) => (
             <ChatMessage key={msg.id} role={msg.role} content={msg.content} />
@@ -114,8 +133,9 @@ export function ChatInterface() {
                 </div>
              </div>
           )}
+          <div ref={scrollRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       <div className="border-t p-4 bg-background">
         <div className="flex items-center gap-2">
