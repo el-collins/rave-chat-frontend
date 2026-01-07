@@ -61,9 +61,9 @@ export function ChatInterface() {
     setIsLoading(true);
 
     // Mock API call for now (Task #1 requirement: n8n integration comes later)
-    // Real API call to n8n
+    // Real API call to Proxy (Next.js API Route)
     try {
-      const response = await fetch(config.n8nWebhookUrl, {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
